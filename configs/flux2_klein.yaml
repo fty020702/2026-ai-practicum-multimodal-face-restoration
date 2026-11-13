@@ -1,0 +1,67 @@
+# ==========================================================================
+# Override for the real FLUX.2 [klein] 4B Base path.
+# Usage: python src/train.py --override configs/flux2_klein.yaml
+#
+# STATUS
+#   structure / API / denoising forward contract : [FACT]
+#     scripts/check_flux2_contract.py          (all PASS)
+#     scripts/check_flux2_train_contract.py    (18 checks, all PASS)
+#   real weights loaded + runtime dims measured : [FACT] 2026-11-07
+#     scripts/inspect_backbone.py -> outputs/logs/backbone_inspect.json
+#   end-to-end forward on CPU : scripts/verify_real_forward.py
+#   end-to-end train on GPU   : [UNVERIFIED] - < 9 GB free VRAM on the 4070 Ti
+#
+# Env: the EXISTING ChatAI conda env, upgraded IN PLACE (docs/环境升级.md).
+#      No separate conda env, per user decision 2026-11-07.
+#
+# [FACT 2026-11-07, CORRECTED] weights come from configs/default.yaml:
+#   BF16 Base : black-forest-labs/FLUX.2-klein-base-4B  <- THE ONLY LOADABLE PIPELINE
+#   FP8  Base : black-forest-labs/FLUX.2-klein-base-4b-fp8
+# The FP8 repo is a SINGLE 4.09 GB ComfyUI-native scaled-FP8 checkpoint with
+# NO model_index.json / scheduler / text_encoder / vae / tokenizer, and
+# Flux2KleinPipeline has neither from_single_file nor FP8 support. It is NOT a
+# pipeline and NOT a runtime dtype cast. scripts/download_models.py downloads
+# the BF16 FULL pipeline (~15.98 GB; duplicate ComfyUI single file excluded).
+#
+# [FACT] The dims below are MEASURED from the real BF16 weights (21 files,
+# 15.98 GB, downloaded 2026-11-07 14:54), NOT guesses:
+#   in_channels           = 128    (packed VAE latent token width)
+#   inner_dim             = 3072   (24 heads x 128; double-block hidden)
+#   joint_attention_dim   = 7680   (3 x Qwen3 hidden 2560, layers 9/18/27)
+#   double blocks         = 5, single blocks = 20
+#   block output order    = (txt, img) -> IMG_INDEX = 1
+# Flux2KleinBackend.apply_runtime_config() still overwrites them from the
+# loaded transformer as a safety net, but the static values are now correct,
+# so TextConditionModule can also be built directly without a shape mismatch.
+# ==========================================================================
+backend:
+  name: flux2_klein
+  resolution: 512             # images are resized to a multiple of 16 before VAE encode
+  # Default: whole pipeline stays on CPU (a 12 GB 4070 Ti cannot hold the
+  # 7.75 GB DiT + 8.05 GB Qwen3 at once). CPU is enough for runtime-dim
+  # inspection, offline prompt precompute and the forward-contract check.
+  # For GPU training set load_transformer_to_device: true AND free >= 9 GB
+  # VRAM first; or try offload_text_encoder: true ([UNVERIFIED] accelerate
+  # offload hooks vs our register_forward_hook injection).
+  offload_text_encoder: false
+  load_transformer_to_device: false
+  release_text_encoder: true
+  # Forward hooks + reentrant gradient checkpointing can starve bypass params
+  # of gradients. Disabled by default until verified with real weights.
+  gradient_checkpointing: false
+
+condition:
+  text_in_dim: 7680      # 3 * 2560 (Qwen3-4B), stacked hidden layers (9,18,27)
+  hidden_dim: 3072       # transformer.inner_dim; bypass q/o projection width
+  cond_dim: 3072
+  ref_bias_out_dim: 128  # transformer.config.in_channels; packed VAE latent width
+  bypass_heads: 8        # independent of the backbone's 24 heads; 3072 % 8 == 0
+  mode: projector_plus_bypass
+
+train:
+  steps: 800
+  batch_size: 1
+  lr: 5.0e-5
+  amp: false             # bf16 frozen backbone + bf16 trainable branch; keep it simple first
+  num_timesteps: 50
+  out_dir: "outputs/checkpoints/flux2_klein"

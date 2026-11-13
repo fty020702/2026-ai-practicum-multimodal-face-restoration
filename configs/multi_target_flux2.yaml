@@ -1,0 +1,63 @@
+# ==========================================================================
+# Real FLUX.2 [klein] 4B Base + ONE-image-MANY-targets dataset.
+#
+# train.py accepts only ONE --override, so this file MERGES
+# configs/flux2_klein.yaml and configs/multi_target.yaml. Do not try to pass
+# both overrides; use this file instead.
+#
+# BEFORE TRAINING (mandatory, CPU, slow):
+#   D:/Anaconda/envs/ChatAI/python.exe scripts/build_multi_target_data.py
+#   D:/Anaconda/envs/ChatAI/python.exe scripts/precompute_prompts.py \
+#       --override configs/multi_target_flux2.yaml
+# The existing Qwen3 cache has only 10 prompts from the OLD dataset; this
+# dataset emits 24 groups x 4 targets x 3 paraphrases = 288 distinct prompts.
+# Encoding ~10 prompts took ~3 h on CPU; budget accordingly and do NOT claim
+# the real-base multi-target run is verified until that cache is complete.
+#
+#   D:/Anaconda/envs/ChatAI/python.exe src/train.py \
+#       --override configs/multi_target_flux2.yaml --device cuda --steps 100
+#
+# [FACT] dims measured from the real BF16 weights (2026-11-07):
+#   in_channels=128, inner_dim=3072, joint_attention_dim=7680,
+#   5 double blocks + 20 single blocks, block output order (txt, img).
+# ==========================================================================
+backend:
+  name: flux2_klein
+  resolution: 512
+  offload_text_encoder: false
+  load_transformer_to_device: false
+  release_text_encoder: true
+  gradient_checkpointing: false
+
+condition:
+  text_in_dim: 7680
+  hidden_dim: 3072
+  cond_dim: 3072
+  ref_bias_out_dim: 128
+  bypass_heads: 8
+  mode: projector_plus_bypass
+
+data:
+  source: multi_target
+  image_size: 64         # matches the 64x64 GPU smoke run that already passed
+  patch_size: 8
+  num_pairs: 24
+  cache_dir: "data"
+  multi_target_manifest: "data/multi_target/train.jsonl"
+
+train:
+  steps: 800
+  batch_size: 1
+  lr: 5.0e-5
+  amp: false
+  num_timesteps: 50
+  out_dir: "outputs/checkpoints/multi_target_flux2"
+
+eval:
+  metrics: [psnr, ssim]
+  text_response_pairs:
+    - ["restore in full natural color: remove scratches dust and grain, recover the original colors",
+       "keep the original sepia tone: remove scratches dust and grain, preserve the warm brown cast"]
+    - ["restore in black and white: remove all aging defects but keep the monochrome look",
+       "minimal repair only: remove scratches and dust, keep the aged film grain and color cast"]
+  response_threshold: 0.01

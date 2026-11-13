@@ -1,0 +1,57 @@
+# ==========================================================================
+# 2026 人工智能实训 · 多模态参考人脸图像恢复   (PRIVATE course repository)
+#
+# 原则：仓库只放「能重建实验的代码 + 配置 + 文档 + 精选成果快照」。
+# 大体积、可再生的资产一律留在本机，按 docs/仓库结构与复现.md 重建。
+# 体积参考（2026-11-13）：models 17 GB / data 2.7 GB / outputs 1.6 GB。
+# ==========================================================================
+
+# --- 大体积资产：本机保留，绝不入库 ---------------------------------------- #
+/models/
+/data/
+/outputs/
+
+# --- 权重 / 检查点 / 数据文件 ---------------------------------------------- #
+*.safetensors
+*.ckpt
+*.bin
+*.pt
+*.pth
+*.onnx
+*.parquet
+*.npz
+*.npy
+*.incomplete
+*.part
+*.tmp
+
+# --- Python / 工具缓存 ------------------------------------------------------ #
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# --- 日志 / 临时 / 编辑器 / 系统 -------------------------------------------- #
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+tmp_*/
+.tmp*/
+
+# --- 成果快照：显式放行，保证仓库自包含 --------------------------------------- #
+!results/
+!results/figures/
+!results/figures/*.png
+!results/figures/*.jpg
+!results/reports/
+!results/reports/*.json
+!results/reports/*.md

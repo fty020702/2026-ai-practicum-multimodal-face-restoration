@@ -1,0 +1,46 @@
+{
+  "status": "DONE",
+  "backend": "black-forest-labs/FLUX.2-klein-base-4B (local BF16)",
+  "mode": "NATIVE reference image + NATIVE frozen Qwen3 text; NO training",
+  "input_image": "data/old_photo_multitarget/old/00000.jpg",
+  "group": 0,
+  "seed": 20261113,
+  "num_inference_steps": 20,
+  "size": 512,
+  "guidance_scale": 4.0,
+  "offload": "model",
+  "cases": [
+    {
+      "id": "natural_color",
+      "prompt": "restore in full natural color: remove scratches dust and grain, recover the original colors. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; preserve the expression of the portrait",
+      "gt": "data/old_photo_multitarget/clean/00000_natural_color.jpg",
+      "output": "outputs\\samples\\flux2_old_photo\\natural_color.png",
+      "seconds": 32.7
+    },
+    {
+      "id": "monochrome",
+      "prompt": "black and white only: repair the print and keep the grayscale tone. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; avoid hallucinating details",
+      "gt": "data/old_photo_multitarget/clean/00000_monochrome.jpg",
+      "output": "outputs\\samples\\flux2_old_photo\\monochrome.png",
+      "seconds": 23.3
+    },
+    {
+      "id": "sepia_tone",
+      "prompt": "restore with sepia tone: clean all defects but keep the vintage brown color. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; keep skin tones natural",
+      "gt": "data/old_photo_multitarget/clean/00000_sepia_tone.jpg",
+      "output": "outputs\\samples\\flux2_old_photo\\sepia_tone.png",
+      "seconds": 21.2
+    },
+    {
+      "id": "minimal_repair",
+      "prompt": "remove only the physical damage: leave the original grain and faded tone intact. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; preserve facial identity",
+      "gt": "data/old_photo_multitarget/clean/00000_minimal_repair.jpg",
+      "output": "outputs\\samples\\flux2_old_photo\\minimal_repair.png",
+      "seconds": 20.1
+    }
+  ],
+  "errors": [],
+  "load_seconds": 0.6,
+  "grid": "outputs\\samples\\flux2_old_photo\\grid.png",
+  "total_seconds": 99.0
+}

@@ -1,0 +1,53 @@
+# ==========================================================================
+# Override: REAL old-photo restoration dataset.
+#   D:/Anaconda/envs/ChatAI/python.exe src/train.py --override configs/old_photo.yaml
+#
+# Built by scripts/build_old_photo_data.py from REAL photographs:
+#   GT       mAiello00/DIV2K (DIV2K_train_HR)  -- real 2K photos
+#   captions ScooterTaylor/DIV2K_captioned_subset -- real human captions
+#   real old microsoft/Bringing-Old-Photos-Back-to-Life + froilo HF -- NO GT
+# See docs/真实数据集与论文对标.md for the paper comparison.
+# ==========================================================================
+project:
+  seed: 20261107
+
+backend:
+  name: toy              # locally runnable; switch to flux2_klein for the real 4B base
+                         # (requires the BF16 pipeline + >=9 GB free VRAM)
+
+data:
+  source: old_photo      # synthetic (default.yaml) | old_photo
+  image_size: 128        # toy trunk: 8x patch -> 16x16=256 tokens; source crops are 256
+  patch_size: 8
+  num_pairs: 72
+  degradations: [gaussian_noise, gaussian_blur, jpeg, downsample_up, rain, haze]
+  cache_dir: "data"
+
+  # --- old_photo specific ---
+  old_photo_manifest: "data/old_photo/train.jsonl"
+  old_photo_captions: "data/old_photo/captions.json"
+  old_photo_size: 256    # saved crop size (paper uses 256x256 random crops)
+  prompts_per_image: 3   # SAME image, DIFFERENT text -> de-confounded d_text ablation
+
+train:
+  steps: 300
+  batch_size: 1
+  lr: 1.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  log_every: 20
+  ckpt_every: 100
+  device: auto
+  amp: false
+  num_timesteps: 50
+  out_dir: "outputs/checkpoints/old_photo"
+
+eval:
+  metrics: [psnr, ssim]
+  # text-response test: same image, same reference, DIFFERENT user instruction
+  text_response_pairs:
+    - ["restore this old photo: remove scratches and film grain noise; preserve facial identity and do not change the face",
+       "restore this old photo: remove scratches and film grain noise; keep the original sepia tone"]
+    - ["restore this old photo: restore the faded contrast; avoid hallucinating details that were not in the original",
+       "restore this old photo: restore the faded contrast; do not over-smooth fabric and fine textures"]
+  response_threshold: 0.01

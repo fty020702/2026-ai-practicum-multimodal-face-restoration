@@ -1,0 +1,115 @@
+{
+  "device": "cuda",
+  "torch": "2.5.1+cu121",
+  "note": "ToyMMDiT + HashTextEncoder. Verifies ARCHITECTURE, not semantic quality.",
+  "cases": [
+    {
+      "mode": "projector_only",
+      "device": "cuda",
+      "checks": {
+        "T1_zero_init": true,
+        "T2_identity_at_init_maxdiff": 0.0,
+        "T2_identity_at_init": true,
+        "T3_no_gradient_leak": true,
+        "T3_text_branch_has_gradient": true,
+        "T3_leaked_params": [],
+        "T3_trained_params": [
+          "projector.net.4.weight",
+          "projector.net.4.bias",
+          "ref_bias_proj.bias"
+        ],
+        "T4_text_branch_updated": true,
+        "T4_backbone_untouched": true,
+        "T4_changed_params": 8,
+        "T4_backbone_changed_params": 0,
+        "T5_d_text_init": 0.0,
+        "T5_d_text_trained": 0.003216,
+        "T5_text_became_effective": true,
+        "T5_threshold_note": "abs_threshold=0.01 (real-model calibration), observed=0.003216",
+        "T5_detail": {
+          "init": {
+            "prompt_a": "restore and denoise this image, keep the brick texture",
+            "prompt_b": "restore and derain this image, keep the brick texture",
+            "d_text": 0.0,
+            "d_base": 0.0,
+            "ratio": 0.0,
+            "threshold_abs": 0.01,
+            "passed": false,
+            "note": "same initial noise for all three runs; differences can only come from text"
+          },
+          "trained": {
+            "prompt_a": "restore and denoise this image, keep the brick texture",
+            "prompt_b": "restore and derain this image, keep the brick texture",
+            "d_text": 0.003216,
+            "d_base": 0.153861,
+            "ratio": 0.0209,
+            "threshold_abs": 0.01,
+            "passed": false,
+            "note": "same initial noise for all three runs; differences can only come from text"
+          }
+        },
+        "T6_trainable_params": 41600,
+        "T6_frozen_params": 711939,
+        "T6_param_ratio": 0.05843,
+        "T6_much_smaller": true
+      },
+      "all_passed": true,
+      "n_checks": 8
+    },
+    {
+      "mode": "projector_plus_bypass",
+      "device": "cuda",
+      "checks": {
+        "T1_zero_init": true,
+        "T2_identity_at_init_maxdiff": 0.0,
+        "T2_identity_at_init": true,
+        "T3_no_gradient_leak": true,
+        "T3_text_branch_has_gradient": true,
+        "T3_leaked_params": [],
+        "T3_trained_params": [
+          "bypasses.0.o_proj.weight",
+          "bypasses.0.o_proj.bias",
+          "bypasses.1.o_proj.weight",
+          "bypasses.1.o_proj.bias",
+          "bypasses.2.o_proj.weight"
+        ],
+        "T4_text_branch_updated": true,
+        "T4_backbone_untouched": true,
+        "T4_changed_params": 30,
+        "T4_backbone_changed_params": 0,
+        "T5_d_text_init": 0.0,
+        "T5_d_text_trained": 0.000563,
+        "T5_text_became_effective": true,
+        "T5_threshold_note": "abs_threshold=0.01 (real-model calibration), observed=0.000563",
+        "T5_detail": {
+          "init": {
+            "prompt_a": "restore and denoise this image, keep the brick texture",
+            "prompt_b": "restore and derain this image, keep the brick texture",
+            "d_text": 0.0,
+            "d_base": 0.0,
+            "ratio": 0.0,
+            "threshold_abs": 0.01,
+            "passed": false,
+            "note": "same initial noise for all three runs; differences can only come from text"
+          },
+          "trained": {
+            "prompt_a": "restore and denoise this image, keep the brick texture",
+            "prompt_b": "restore and derain this image, keep the brick texture",
+            "d_text": 0.000563,
+            "d_base": 0.168769,
+            "ratio": 0.0033,
+            "threshold_abs": 0.01,
+            "passed": false,
+            "note": "same initial noise for all three runs; differences can only come from text"
+          }
+        },
+        "T6_trainable_params": 239744,
+        "T6_frozen_params": 711939,
+        "T6_param_ratio": 0.33675,
+        "T6_much_smaller": true
+      },
+      "all_passed": true,
+      "n_checks": 8
+    }
+  ]
+}

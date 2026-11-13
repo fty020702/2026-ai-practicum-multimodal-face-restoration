@@ -1,0 +1,131 @@
+{
+  "model_id": "black-forest-labs/FLUX.2-klein-base-4B",
+  "status": "OK",
+  "checks": {
+    "diffusers": "0.37.1",
+    "transformers": "4.57.6",
+    "weights_source": "G:\\研究生生涯相关\\课程\\人工智能系统实训\\models\\FLUX.2-klein-4B-Base",
+    "pipeline_class": "Flux2KleinPipeline",
+    "transformer_class": "Flux2Transformer2DModel",
+    "text_encoder_class": "Qwen3ForCausalLM",
+    "text_encoder_config": {
+      "vocab_size": 151936,
+      "hidden_size": 2560,
+      "num_hidden_layers": 36,
+      "model_type": "qwen3"
+    },
+    "pipeline_call_signature": "(image: list[PIL.Image.Image] | PIL.Image.Image | None = None, prompt: str | list[str] = None, height: int | None = None, width: int | None = None, num_inference_steps: int = 50, sigmas: list[float] | None = None, guidance_scale: float = 4.0, num_images_per_prompt: int = 1, generator: torch._C.Generator | list[torch._C.Generator] | None = None, latents: torch.Tensor | None = None, prompt_embeds: torch.Tensor | None = None, negative_prompt_embeds: str | list[str] | None = None, output_type: str = 'pil', return_dict: bool = True, attention_kwargs: dict[str, typing.Any] | None = None, callback_on_step_end: Optional[Callable[[int, int, dict], NoneType]] = None, callback_on_step_end_tensor_inputs: list[str] = ['latents'], max_sequence_length: int = 512, text_encoder_out_layers: tuple[int] = (9, 18, 27))",
+    "runtime_dims": {
+      "in_channels": 128,
+      "inner_dim": 3072,
+      "joint_attention_dim": 7680,
+      "num_attention_heads": 24,
+      "attention_head_dim": 128,
+      "x_embedder_in_features": 128,
+      "context_embedder_in_features": 7680
+    },
+    "candidate_block_lists": {
+      "transformer_blocks": {
+        "length": 5,
+        "element_types": [
+          "Flux2TransformerBlock",
+          "Flux2TransformerBlock",
+          "Flux2TransformerBlock"
+        ]
+      },
+      "single_transformer_blocks": {
+        "length": 20,
+        "element_types": [
+          "Flux2SingleTransformerBlock",
+          "Flux2SingleTransformerBlock",
+          "Flux2SingleTransformerBlock"
+        ]
+      }
+    },
+    "block_forward_signature": "(hidden_states: torch.Tensor, encoder_hidden_states: torch.Tensor, temb_mod_img: torch.Tensor, temb_mod_txt: torch.Tensor, image_rotary_emb: tuple[torch.Tensor, torch.Tensor] | None = None, joint_attention_kwargs: dict[str, typing.Any] | None = None) -> tuple[torch.Tensor, torch.Tensor]",
+    "block_returns_txt_first": true,
+    "first_block_linears": [
+      [
+        "attn.to_q",
+        3072,
+        3072
+      ],
+      [
+        "attn.to_k",
+        3072,
+        3072
+      ],
+      [
+        "attn.to_v",
+        3072,
+        3072
+      ],
+      [
+        "attn.to_out.0",
+        3072,
+        3072
+      ],
+      [
+        "attn.add_q_proj",
+        3072,
+        3072
+      ],
+      [
+        "attn.add_k_proj",
+        3072,
+        3072
+      ],
+      [
+        "attn.add_v_proj",
+        3072,
+        3072
+      ],
+      [
+        "attn.to_add_out",
+        3072,
+        3072
+      ],
+      [
+        "ff.linear_in",
+        3072,
+        18432
+      ],
+      [
+        "ff.linear_out",
+        9216,
+        3072
+      ],
+      [
+        "ff_context.linear_in",
+        3072,
+        18432
+      ],
+      [
+        "ff_context.linear_out",
+        9216,
+        3072
+      ]
+    ],
+    "config_reconciliation": {
+      "ok": true,
+      "mismatches": {}
+    }
+  },
+  "measured": {
+    "inner_dim": 3072,
+    "joint_attention_dim": 7680,
+    "in_channels": 128,
+    "n_double_blocks": 5,
+    "n_single_blocks": 20,
+    "block_returns_txt_first": true
+  },
+  "notes": [
+    "[FACT] Real BF16 full pipeline loaded on CPU; dims above are MEASURED, not guessed.",
+    "Structure contract verified WITHOUT weights by scripts/check_flux2_contract.py and scripts/check_flux2_train_contract.py (both all PASS).",
+    "BLOCK_QUERY=('transformer_blocks',) and IMG_INDEX=1 are set from source; single_transformer_blocks are deliberately excluded (concatenated txt+img stream).",
+    "Reference images are VAE-encoded and CONCATENATED INTO the image stream, NOT the text stream; encoder_hidden_states is the Qwen3 prompt_embeds text stream (kept frozen+constant).",
+    "Three distinct dims: in_channels (packed latents -> ref bias), inner_dim (block hidden -> bypass), joint_attention_dim (text_in_dim). apply_runtime_config() sets all three.",
+    "config_reconciliation.ok=False means configs/flux2_klein.yaml still holds stale placeholder dims; fix them before building TextConditionModule directly.",
+    "Next: scripts/precompute_prompts.py -> scripts/verify_real_backend.py -> scripts/verify_real_forward.py"
+  ]
+}

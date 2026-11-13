@@ -1,0 +1,48 @@
+# ==========================================================================
+# OLD PHOTO (generated) + TEXT -> DIFFERENT HIGH-RES RESTORATIONS
+# Build first:
+#   D:/Anaconda/envs/ChatAI/python.exe scripts/build_old_photo_multitarget.py --groups 800
+#
+# ONE shared synthetically-aged old-photo input -> K=4 different high-res
+# restoration targets; only the text selects the target.
+# 800 groups on disk (~480MB); train on 300 ("不一定全部训练").
+#
+# Control: configs/old_photo_multitarget_control.yaml (collapse_targets=true)
+# ==========================================================================
+project:
+  seed: 20261107
+
+backend:
+  name: toy
+
+data:
+  source: multi_target
+  image_size: 64
+  patch_size: 8
+  num_pairs: 300
+  cache_dir: "data"
+  multi_target_manifest: "data/old_photo_multitarget/train.jsonl"
+
+train:
+  steps: 1200
+  batch_size: 1
+  lr: 5.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  log_every: 100
+  ckpt_every: 400
+  device: auto
+  amp: false
+  num_timesteps: 50
+  t_min: 0.90
+  t_max: 1.0
+  out_dir: "outputs/checkpoints/old_photo_multitarget"
+
+eval:
+  metrics: [psnr, ssim]
+  text_response_pairs:
+    - ["restore in full natural color: remove scratches dust and grain, recover the original colors",
+       "keep the original sepia tone: remove scratches dust and grain, preserve the warm brown cast"]
+    - ["restore in black and white: remove all aging defects but keep the monochrome look",
+       "minimal repair only: remove scratches and dust, keep the aged film grain and color cast"]
+  response_threshold: 0.01

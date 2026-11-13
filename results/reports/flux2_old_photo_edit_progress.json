@@ -1,0 +1,48 @@
+{
+  "status": "DONE",
+  "backend": "black-forest-labs/FLUX.2-klein-base-4B (local BF16)",
+  "mode": "NATIVE reference image + NATIVE frozen Qwen3 text; NO training",
+  "input_image": "data/old_photo_multitarget/old/00000.jpg",
+  "group": 0,
+  "seed": 20261113,
+  "tag": "old_photo_edit",
+  "prompt_set": "edit",
+  "num_inference_steps": 20,
+  "size": 512,
+  "guidance_scale": 4.0,
+  "offload": "model",
+  "cases": [
+    {
+      "id": "baseline",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, repair the faded tones. Keep the original background, the person and the face EXACTLY as they are.",
+      "gt": null,
+      "output": "outputs\\samples\\flux2_old_photo_edit\\baseline.png",
+      "seconds": 30.7
+    },
+    {
+      "id": "blue_sky",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, and CHANGE THE BACKGROUND to a clear bright blue sky with a few white clouds. Keep the person, the face and the clothing unchanged.",
+      "gt": null,
+      "output": "outputs\\samples\\flux2_old_photo_edit\\blue_sky.png",
+      "seconds": 19.6
+    },
+    {
+      "id": "beard",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, and ADD A THICK DARK BEARD AND MOUSTACHE to the person's face. Keep the original background and clothing unchanged.",
+      "gt": null,
+      "output": "outputs\\samples\\flux2_old_photo_edit\\beard.png",
+      "seconds": 19.4
+    },
+    {
+      "id": "sky_and_beard",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, CHANGE THE BACKGROUND to a clear bright blue sky with white clouds, and ADD A THICK DARK BEARD AND MOUSTACHE to the person's face.",
+      "gt": null,
+      "output": "outputs\\samples\\flux2_old_photo_edit\\sky_and_beard.png",
+      "seconds": 19.3
+    }
+  ],
+  "errors": [],
+  "load_seconds": 0.5,
+  "grid": "outputs\\samples\\flux2_old_photo_edit\\grid.png",
+  "total_seconds": 90.5
+}

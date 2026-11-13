@@ -1,0 +1,52 @@
+# ==========================================================================
+# STRICT CONTROL for the one-image-many-targets experiment.
+#
+# Identical to configs/multi_target.yaml EXCEPT `collapse_targets: true`:
+# every group still has K=4 DIFFERENT texts, but all four point at the SAME
+# clean image. Same real photos, same degradation, same prompts, same model,
+# same seed, same steps -- the only variable is "does the GT change with text".
+#
+#   D:/Anaconda/envs/ChatAI/python.exe src/train.py \
+#       --override configs/single_target_control.yaml --steps 400 --device cpu \
+#       --out-dir outputs/checkpoints/amb_single_target
+#
+# Expected (and previously measured on FLUX.2 / synthetic data):
+#   wrong-text penalty ~ 0  -> the objective does not need the text.
+# Compare with configs/multi_target.yaml via scripts/diagnose_ambiguity.py.
+# ==========================================================================
+project:
+  seed: 20261107
+
+backend:
+  name: toy
+
+data:
+  source: multi_target
+  collapse_targets: true       # <-- THE ONLY EXPERIMENTAL VARIABLE
+  image_size: 64
+  patch_size: 8
+  num_pairs: 24
+  cache_dir: "data"
+  multi_target_manifest: "data/multi_target/train.jsonl"
+
+train:
+  steps: 400
+  batch_size: 1
+  lr: 1.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  log_every: 20
+  ckpt_every: 100
+  device: auto
+  amp: false
+  num_timesteps: 50
+  out_dir: "outputs/checkpoints/amb_single_target"
+
+eval:
+  metrics: [psnr, ssim]
+  text_response_pairs:
+    - ["restore in full natural color: remove scratches dust and grain, recover the original colors",
+       "keep the original sepia tone: remove scratches dust and grain, preserve the warm brown cast"]
+    - ["restore in black and white: remove all aging defects but keep the monochrome look",
+       "minimal repair only: remove scratches and dust, keep the aged film grain and color cast"]
+  response_threshold: 0.01

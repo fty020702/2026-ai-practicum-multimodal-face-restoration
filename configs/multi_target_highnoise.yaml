@@ -1,0 +1,52 @@
+# ==========================================================================
+# Multi-target dataset + HIGH-NOISE timestep sampling.
+#
+# Motivation: with t ~ U(0,1), x_t = (1-t)x0 + t*x1 leaks the clean target x0
+# into the model input at small t, so the text can be ignored. Restricting t
+# to [0.8, 1.0] makes x_t ~= x1 (pure noise): ref (degraded image) gives the
+# CONTENT, and the TEXT becomes the only source of the TARGET STYLE.
+#
+#   D:/Anaconda/envs/ChatAI/python.exe src/train.py \
+#       --override configs/multi_target_highnoise.yaml --steps 400 --device cpu \
+#       --out-dir outputs/checkpoints/amb_multi_hn
+#
+# Control: configs/single_target_highnoise.yaml (identical except
+# collapse_targets: true). Compare via scripts/diagnose_ambiguity.py.
+# ==========================================================================
+project:
+  seed: 20261107
+
+backend:
+  name: toy
+
+data:
+  source: multi_target
+  image_size: 64
+  patch_size: 8
+  num_pairs: 24
+  cache_dir: "data"
+  multi_target_manifest: "data/multi_target/train.jsonl"
+
+train:
+  steps: 400
+  batch_size: 1
+  lr: 1.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  log_every: 20
+  ckpt_every: 100
+  device: auto
+  amp: false
+  num_timesteps: 50
+  t_min: 0.80            # <-- high-noise end; default configs keep (0,1)
+  t_max: 1.0
+  out_dir: "outputs/checkpoints/amb_multi_hn"
+
+eval:
+  metrics: [psnr, ssim]
+  text_response_pairs:
+    - ["restore in full natural color: remove scratches dust and grain, recover the original colors",
+       "keep the original sepia tone: remove scratches dust and grain, preserve the warm brown cast"]
+    - ["restore in black and white: remove all aging defects but keep the monochrome look",
+       "minimal repair only: remove scratches and dust, keep the aged film grain and color cast"]
+  response_threshold: 0.01

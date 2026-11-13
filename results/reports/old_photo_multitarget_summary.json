@@ -1,0 +1,62 @@
+{
+  "dataset": {
+    "n_groups": 800,
+    "K": 4,
+    "n_samples": 3200,
+    "jpg_MB": 463.3,
+    "inter_target_rms": 52.28,
+    "gt_pool": "timbrooks/instructpix2pix-clip-filtered shard 0",
+    "old_photo_defects": [
+      "fading",
+      "sepia",
+      "film_grain",
+      "scratches",
+      "dust_spots",
+      "vignette"
+    ],
+    "honesty": [
+      "x is a synthetically aged generated photograph, not a digitized historical print",
+      "y0 is the official GT; y1..y3 are deterministic tone transforms of y0, not independent expert restorations",
+      "validates text-selected restoration, NOT restoration quality, language understanding or real user preference"
+    ]
+  },
+  "training": {
+    "steps": 1200,
+    "device": "cuda",
+    "a_class_loss_start": 1.510008,
+    "a_class_loss_end": 1.03052,
+    "a_class_elapsed_s": 29.4,
+    "control_loss_start": 1.510008,
+    "control_loss_end": 1.030597,
+    "control_elapsed_s": 22.9,
+    "t_range": [
+      0.9,
+      1.0
+    ]
+  },
+  "diagnostic": {
+    "file": "outputs\\logs\\ambiguity_old_photo_ab_g32.json",
+    "n_groups_probed": 32,
+    "timestep_t": 0.999,
+    "no_text_mse_floor": 0.00566533,
+    "control_penalty_to_gap_pct": 0.034,
+    "a_class_penalty_to_gap_pct": 7.281,
+    "control_style_selectivity_pct": 3.331,
+    "a_class_style_selectivity_pct": 4.42,
+    "threshold_pct": 10.0,
+    "control_text_needed": false,
+    "a_class_text_needed": false
+  },
+  "verdict": "NOT-YET-SUPPORTED: wrong text still barely changes the loss; train longer / bias training t toward 1 / check that the checkpoint was trained on THIS multi-target dataset",
+  "comparison_with_ip2p_a_class": {
+    "ip2p_control_penalty_to_gap_pct": -1.0,
+    "ip2p_a_class_penalty_to_gap_pct": 36.73,
+    "note": "the generated OLD-PHOTO variant is HARDER: 300 groups x 3 paraphrases = 3600 distinct prompts, only ~1 pass per sample in 1200 steps, and the 4 targets differ mostly in global tone, which 64x64 downsampling compresses. Do NOT claim the old-photo dataset reproduces the IP2P 36.73% result."
+  },
+  "next_steps": [
+    "fix prompt dilution: train with prompts[0] only (or 3000+ steps)",
+    "raise t_min to 0.95 and keep the high-noise bias",
+    "reduce num_pairs to 200 so each (group,target) is seen >=1.5x",
+    "re-run the SAME strict A/B before claiming TEXT-NECESSITY-SUPPORTED"
+  ]
+}

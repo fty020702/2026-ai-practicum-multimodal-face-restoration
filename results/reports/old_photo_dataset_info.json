@@ -1,0 +1,64 @@
+{
+  "created": "2026-11-13T12:09:55",
+  "task": "OLD PHOTO (generated) + TEXT -> DIFFERENT HIGH-RES RESTORATIONS",
+  "design": "ONE shared synthetically-aged old-photo input -> K=4 different high-res restoration targets; text is the ONLY disambiguating signal",
+  "why_self_built": "no public dataset combines old-photo damage, text instructions and multiple aligned HQ targets; real historical photos have no clean GT",
+  "benchmarks": [
+    "Wan et al., CVPR 2020 (structured/unstructured old-photo defects)",
+    "RealOld / Pik-Fix, WACV 2023 (200 real old photos, 1 GT each)",
+    "GGT-100K, 2026 (generative GT, Old Photo 6,105 pairs, 1 GT each)",
+    "CIN25 / Text2Colors-PAT (colourisation is ill-posed)",
+    "InstructPix2Pix, CVPR 2023 (instruction -> target triplet)",
+    "RFIR, ESWA 2025 (partial / negative restoration prompts)"
+  ],
+  "gt_pool": {
+    "source": "timbrooks/instructpix2pix-clip-filtered shard 0",
+    "path": "data\\ip2p_500m\\raw\\train-00000-of-00262-57cebf95b4a9170c.parquet",
+    "bytes": 499831414,
+    "rows_available": 1195,
+    "column_used": "edited_image (512x512 JPEG)",
+    "note": "SD + Prompt-to-Prompt generated, NOT real photographs"
+  },
+  "old_photo_input": {
+    "function": "make_shared_degraded() from src/data/multi_target_old_photo.py",
+    "defects": [
+      "fading",
+      "sepia",
+      "film_grain",
+      "scratches",
+      "dust_spots",
+      "vignette"
+    ],
+    "shared_across_targets": true
+  },
+  "n_groups": 800,
+  "K_targets_per_group": 4,
+  "n_samples": 3200,
+  "n_prompt_variants": 9600,
+  "target_ids": [
+    "natural_color",
+    "monochrome",
+    "sepia_tone",
+    "minimal_repair"
+  ],
+  "image_size": [
+    512,
+    512
+  ],
+  "inter_target_rms_mean": 52.28,
+  "inter_target_rms_min": 37.07,
+  "jpg_bytes_total": 463296358,
+  "jpg_count": 4000,
+  "anti_confound": [
+    "the OLD-PHOTO input is IDENTICAL for all K targets",
+    "the shared x always has a colour cast, grain AND scratches, so the desired restoration style cannot be read from the image",
+    "style phrase is in the FIRST words of every prompt",
+    "3 distinct paraphrases per target",
+    "caption (official original_prompt) and constraints are independent of the target id"
+  ],
+  "honesty": [
+    "x is a synthetically aged generated photograph, not a digitized historical print",
+    "y0 is the official GT; y1..y3 are deterministic tone transforms of y0, not independent expert restorations",
+    "validates text-selected restoration, NOT restoration quality, language understanding or real user preference"
+  ]
+}

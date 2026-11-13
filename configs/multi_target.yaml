@@ -1,0 +1,52 @@
+# ==========================================================================
+# Override: ONE degraded image -> K DIFFERENT clean targets, text decides which.
+#   D:/Anaconda/envs/ChatAI/python.exe src/train.py --override configs/multi_target.yaml
+#
+# Build data first:
+#   D:/Anaconda/envs/ChatAI/python.exe scripts/build_multi_target_data.py
+#
+# This is the direct answer to the confound found by
+# scripts/diagnose_text_usage.py: on single-target data, changing the text
+# changed the loss by 1 bf16 ULP (1.08%). Here the no-text MSE floor is
+# Var_k(y_k) > 0, so a text-ignoring model is penalised by plain MSE.
+# See docs/一图多目标数据集调研.md.
+# ==========================================================================
+project:
+  seed: 20261107
+
+backend:
+  name: toy              # fast, locally runnable; real 4B -> multi_target_flux2.yaml
+
+data:
+  source: multi_target
+  image_size: 64         # toy trunk: patch 8 -> 8x8 = 64 tokens
+  patch_size: 8
+  num_pairs: 24          # groups (each group emits K=4 samples)
+  cache_dir: "data"
+
+  multi_target_manifest: "data/multi_target/train.jsonl"
+  # K is fixed by TARGET_IDS in src/data/multi_target_old_photo.py (=4).
+
+train:
+  steps: 400
+  batch_size: 1
+  lr: 1.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  log_every: 20
+  ckpt_every: 100
+  device: auto
+  amp: false
+  num_timesteps: 50
+  out_dir: "outputs/checkpoints/multi_target"
+
+eval:
+  metrics: [psnr, ssim]
+  # text-response test now compares DIFFERENT TARGET STYLES, not just
+  # different paraphrases of one instruction.
+  text_response_pairs:
+    - ["restore in full natural color: remove scratches dust and grain, recover the original colors",
+       "keep the original sepia tone: remove scratches dust and grain, preserve the warm brown cast"]
+    - ["restore in black and white: remove all aging defects but keep the monochrome look",
+       "minimal repair only: remove scratches and dust, keep the aged film grain and color cast"]
+  response_threshold: 0.01

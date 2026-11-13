@@ -1,0 +1,47 @@
+{
+  "dataset": {
+    "repo": "timbrooks/instructpix2pix-clip-filtered",
+    "shard_bytes": 499831414,
+    "shard_rows": 1195,
+    "a_class_native": false,
+    "image_note": "SD + Prompt-to-Prompt generated, NOT real photos",
+    "rows_used_triplet": 800,
+    "distinct_edit_prompts": 748,
+    "a_class_groups": 200,
+    "a_class_samples": 800,
+    "inter_target_rms": 52.668,
+    "total_dir_MB": 599.47
+  },
+  "training": {
+    "triplet": {
+      "steps": 1200,
+      "device": "cuda",
+      "loss_start": 1.453311,
+      "loss_end": 1.0309,
+      "elapsed_s": 28
+    },
+    "a_class": {
+      "steps": 1200,
+      "device": "cuda"
+    },
+    "control": {
+      "steps": 1200,
+      "device": "cuda"
+    }
+  },
+  "results": {
+    "official_triplet_wrong_penalty_relative": 0.00017122,
+    "official_triplet_verdict": "NO TEXT-SPECIFIC RESPONSE: wrong edit_prompt barely changes loss; consistent with a single-target-per-input dataset (no ambiguity floor) plus a hash text encoder that cannot generalise semantics",
+    "control_penalty_to_gap_pct": -1.0,
+    "a_class_penalty_to_gap_pct": 36.73,
+    "control_style_selectivity_pct": 3.83,
+    "a_class_style_selectivity_pct": 7.92,
+    "a_class_text_needed_by_loss": true,
+    "verdict": "TEXT-NECESSITY-SUPPORTED: swapping in the wrong target's text increases the loss by 36.7% of the theoretical no-text MSE floor"
+  },
+  "honesty": [
+    "toy trunk (random, frozen) + HashTextEncoder; NOT language understanding, NOT restoration quality, NOT real FLUX.2",
+    "real FLUX.2 would need a fresh Qwen3 offline cache for these 748+ new edit_prompts (CPU ~3h / 10 prompts)",
+    "y1..y3 of the A-class view are deterministic tone transforms of the official edited_image, not independent photographs"
+  ]
+}

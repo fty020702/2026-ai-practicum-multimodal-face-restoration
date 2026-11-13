@@ -1,0 +1,33 @@
+# ==========================================================================
+# Environment: the EXISTING ChatAI conda env, upgraded IN PLACE 2026-11-07.
+# User decision: do NOT create a separate conda env.
+# Full record: docs/环境升级.md   Rollback snapshot: docs/升级前包快照_20261107.txt
+# ==========================================================================
+# Verified working set (torch / CUDA deliberately left untouched):
+#   Python 3.11.8
+#   torch 2.5.1+cu121        CUDA True, RTX 4070 Ti
+#   diffusers 0.37.1         Flux2KleinPipeline available
+#   transformers 4.57.6      Qwen3 support; kept <5 for sentence-transformers
+#   accelerate 1.0.1
+#   peft 0.19.1
+#   huggingface_hub 0.36.2
+#   tokenizers 0.22.2
+#   sentence-transformers 4.1.0   (upgraded to fix cached_download removal)
+#   numpy 1.24.4 / Pillow 9.5.0 / opencv-python 4.9.0 / PyYAML / tqdm / lpips
+#
+# Reproduce the upgrade (ChatAI env):
+#   pip install -U "diffusers==0.37.1" "transformers>=4.51,<5" \
+#                  "accelerate==1.0.1" "huggingface_hub>=0.30,<1" \
+#                  "peft>=0.13,<0.20" "sentence-transformers>=3.0,<5" \
+#                  "h11==0.14.0"
+#   pip uninstall -y httpx2 httpcore2
+#
+# Two traps found the hard way:
+#   * diffusers >= 0.42 calls torch.accelerator, which does NOT exist in
+#     torch 2.5.1 -> `import diffusers` fails immediately. Pin 0.37.1.
+#   * transformers >= 5 breaks the installed sentence-transformers 2.2.2.
+#     Keep <5 (and upgrade sentence-transformers to 4.x).
+# ==========================================================================
+# Optional (not installed, not needed for the verified path):
+#   gradio              app/gradio_demo.py
+#   bitsandbytes>=0.44  4-bit text-encoder offload; Windows support varies

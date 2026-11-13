@@ -1,0 +1,74 @@
+# ==========================================================================
+# Default config. This is the LOCALLY VERIFIED path (ChatAI conda env).
+# All paths are derived from src/utils.py ROOT, so the project is relocatable.
+# ==========================================================================
+project:
+  name: text-guided-image-restoration
+  seed: 20261107
+
+backend:
+  name: toy                 # toy | flux2_klein
+  # --- only used when name == flux2_klein ---
+  # [FACT 2026-11-07, verified via HF API + model cards + safetensors header]
+  # ONLY this repo is a loadable diffusers pipeline:
+  #   model_index.json + scheduler/ + transformer/ + text_encoder/ + vae/ + tokenizer/
+  model_id: "black-forest-labs/FLUX.2-klein-base-4B"
+  # [FACT] The FP8 repo is a SINGLE 4.09 GB ComfyUI-native scaled-FP8
+  # checkpoint (double_blocks.*, float8_e4m3fn + per-layer scales). It has NO
+  # model_index.json / text_encoder / vae / tokenizer and CANNOT be loaded by
+  # Flux2KleinPipeline (no from_single_file, no FP8 support). Research only.
+  fp8_repo_id: "black-forest-labs/FLUX.2-klein-base-4b-fp8"
+  prefer_fp8: false         # DEPRECATED: keep false; FP8 is not loadable
+  text_encoder_id: "Qwen/Qwen3-4B"                     # Klein 4B ships Qwen3-4B, NOT Mistral 24B (that is FLUX.2 dev)
+  dtype: bf16               # compute dtype is ALWAYS torch.bfloat16 (official recipe)
+  offline_text_cache: true  # encode prompts on CPU once; encoder never enters VRAM during training
+  offload_text_encoder: false        # [UNVERIFIED] accelerate offload hooks vs our forward hooks
+  load_transformer_to_device: false  # keep whole pipeline on CPU by default (12 GB 4070 Ti)
+  gradient_checkpointing: true
+  resolution: 512
+
+condition:
+  mode: projector_plus_bypass   # projector_only | projector_plus_bypass
+  text_in_dim: 256              # toy: dim of the frozen "text encoder" features
+  hidden_dim: 512
+  cond_dim: 512
+  projector_layers: 2
+  projector_dropout: 0.0
+  zero_init_last: true
+  bypass_heads: 4
+  bypass_scale: 1.0
+
+backbone:
+  dim: 512
+  num_blocks: 4
+  heads: 4
+  num_img_tokens: 64        # 8x8 patches of a 64x64 image
+  num_ref_tokens: 16        # reference-image condition tokens (the FROZEN branch)
+  num_text_tokens: 8        # user text tokens (the NEW trainable branch)
+
+train:
+  steps: 300
+  batch_size: 1
+  lr: 1.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  log_every: 20
+  ckpt_every: 100
+  device: auto              # auto | cuda | cpu
+  amp: false
+  num_timesteps: 50
+  out_dir: "outputs/checkpoints/toy"
+
+data:
+  image_size: 64
+  patch_size: 8
+  num_pairs: 64
+  degradations: [gaussian_noise, gaussian_blur, jpeg, downsample_up, rain, haze]
+  cache_dir: "data"
+
+eval:
+  metrics: [psnr, ssim]     # lpips added automatically when the package is available
+  text_response_pairs:
+    - ["restore and denoise this image, keep the brick texture", "restore and derain this image, keep the brick texture"]
+    - ["remove noise, preserve facial detail", "remove rain streaks, preserve facial detail"]
+  response_threshold: 0.01  # relative L2 change required to claim text has an effect

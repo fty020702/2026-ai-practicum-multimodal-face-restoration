@@ -1,0 +1,45 @@
+# STRICT CONTROL for configs/multi_target_strong.yaml.
+# Identical in EVERY respect except `collapse_targets: true`.
+#
+#   D:/Anaconda/envs/ChatAI/python.exe src/train.py \
+#       --override configs/single_target_strong.yaml --device cpu \
+#       --out-dir outputs/checkpoints/amb_single_strong
+# ==========================================================================
+project:
+  seed: 20261107
+
+backend:
+  name: toy
+
+data:
+  source: multi_target
+  collapse_targets: true   # <-- THE ONLY EXPERIMENTAL VARIABLE
+  image_size: 64
+  patch_size: 8
+  num_pairs: 24
+  cache_dir: "data"
+  multi_target_manifest: "data/multi_target/train.jsonl"
+
+train:
+  steps: 1200
+  batch_size: 1
+  lr: 5.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  log_every: 100
+  ckpt_every: 400
+  device: auto
+  amp: false
+  num_timesteps: 50
+  t_min: 0.90
+  t_max: 1.0
+  out_dir: "outputs/checkpoints/amb_single_strong"
+
+eval:
+  metrics: [psnr, ssim]
+  text_response_pairs:
+    - ["restore in full natural color: remove scratches dust and grain, recover the original colors",
+       "keep the original sepia tone: remove scratches dust and grain, preserve the warm brown cast"]
+    - ["restore in black and white: remove all aging defects but keep the monochrome look",
+       "minimal repair only: remove scratches and dust, keep the aged film grain and color cast"]
+  response_threshold: 0.01
