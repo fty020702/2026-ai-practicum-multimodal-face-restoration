@@ -30,8 +30,10 @@
 | **官方 500MB 数据集 + 本地训练（2026-11-13）** | **[RESULT] 已落盘并跑通** | 下载 `timbrooks/instructpix2pix-clip-filtered` 单个 parquet 分片 **499,831,414 B / 1,195 行 / 512² JPEG**，按官方 triplet 格式（`original_image→degraded`、`edited_image→clean`、`edit_prompt→prompt`）接进 `make_dataset()`；用 800 行 / 748 条真实编辑指令在 CUDA 上训 1200 步（28 s，loss 1.453→1.031，4 个 checkpoint）。**证伪检验为负**：`wrong_penalty_relative=0.017%`，`text_needed_by_loss=false` —— 格式对但没有一图多目标就没有歧义下界。随后用该分片构造 200 组 ×4 目标 A 类视图，严格 A/B 得 `penalty/gap` 对照 −1.0% vs **36.73%**，样式选择性 3.83% vs **7.92%**，`TEXT-NECESSITY-SUPPORTED`。详见 `outputs/logs/ip2p_500m_summary.json` |
 | **老照片（生成的）+ 文本 → 多个不同高清目标（2026-11-13）** | **[RESULT] 已落盘、已训练；严格 A/B 未过阈值** | 自建 **800 组 × K=4 = 3200 样本 / 463.3 MB / 512² JPEG**：一张共享的合成老化老照片（fading / sepia / film_grain / scratches / dust_spots / vignette）对应 4 个不同高清修复目标（自然色 / 黑白 / sepia / 保守修复），目标间像素 RMS **52.28**，每个目标 3 条独立文本改写。CUDA 上各训 1200 步（A 类 / `collapse_targets` 严格对照）。**诚实结论：方向对但量级不足** —— 32 组探针 `penalty/gap` 对照 **0.03%** vs A 类 **7.28%**（8 组探针 0.80% vs **9.30%**），阈值 10%，verdict **`NOT-YET-SUPPORTED`**，未复现 IP2P A 类的 36.73%。根因推测：300 组 ×3 改写 = 3600 条 distinct prompt，1200 步只够每个样本约 1 次；且 4 个目标主要是全局色调差异，64×64 下采样后被压缩。示例 `outputs/samples/old_photo_multitarget_example.png`，汇总 `outputs/logs/old_photo_multitarget_summary.json` |
 | **反向方案调研：冻结文本、只训参考图分支（2026-11-13）** | **[FACT] 有成熟先例，本机可直接用** | IP-Adapter（22M 参数、解耦 cross-attn）/ ControlNet 就是该范式。本地 `diffusers 0.37.1` 实测：`FluxPipeline` / `StableDiffusionXLPipeline` **自带** `load_ip_adapter()` + `set_ip_adapter_scale()`；而 `Flux2KleinPipeline` **没有** `load_ip_adapter()`，因为官方原生 `image=[...]` 多参考图（VAE latent 沿序列维拼进图像流，Qwen3 `prompt_embeds` 独立）已经做完了这件事。结论：**路走得通，但在我们选定的基座上不必造**；「原生文本能力不变」只在权重层面成立，行为层面有明确干扰证据。详见 `docs/冻结文生图_只训参考图分支_先例调研.md` |
-| **真实 FLUX.2 出图实测（2026-11-13）** | **[RESULT] 已跑通，肉眼可见文本控制** | 本地 15.98 GB BF16 权重 + `enable_model_cpu_offload()`，4070Ti 12 GB，512² / 20 步 / guidance 4.0，**零训练**（原生 Qwen3 与 DiT 全冻结），参考图走官方 `image=`。组 A：同一张老化肖像 + 4 条修复风格文本 → 99 s 出 4 张，划痕/褪色去除且自然色/黑白/sepia/保守修复明显不同。组 B：用户点名的编辑指令 → 90.5 s 出 4 张，`blue_sky` 真的变蓝天白云、`beard` 真的长出浓密黑胡子、`sky_and_beard` 两者同时生效；同一 seed、同一步数，唯一变量是文本。图见 `outputs/samples/flux2_old_photo/grid.png` 与 `flux2_old_photo_edit/grid.png`，脚本 `scripts/run_flux2_old_photo_demo.py`。**边界**：这是原生模型能力，不是我们训练的文本旁路，也未做 PSNR/SSIM；详见 `docs/冻结文生图_只训参考图分支_先例调研.md` §9 |
-| Gradio 演示 | **[UNVERIFIED]** | 当前 env 没装 gradio |
+| **真实 FLUX.2 出图实测（2026-11-13）** | **[RESULT] 已跑通，肉眼可见文本控制** | 本地 15.98 GB BF16 权重 + `enable_model_cpu_offload()`，4070Ti 12 GB，512² / 20 步 / guidance 4.0，**零训练**（原生 Qwen3 与 DiT 全冻结），参考图走官方 `image=`。组 A：同一张老化肖像 + 4 条修复风格文本 → 99 s 出 4 张，划痕/褪色去除且自然色/黑白/sepia/保守修复明显不同。组 B：用户点名的编辑指令 → 90.5 s 出 4 张，`blue_sky` 真的变蓝天白云、`beard` 真的长出浓密黑胡子、`sky_and_beard` 两者同时生效；同一 seed、同一步数，唯一变量是文本。图见 `outputs/samples/flux2_old_photo/grid.png` 与 `flux2_old_photo_edit/grid.png`，脚本 `scripts/run_flux2_old_photo_demo.py`。**边界**：这是原生模型能力，不是我们训练的文本旁路；PSNR/SSIM/LPIPS 已于 2026-11-17 补齐且为**负面结果**（见下两行与 `docs/方案设计.md` §9）。详见 `docs/冻结文生图_只训参考图分支_先例调研.md` §9 |
+| **系统架构图（2026-11-17）** | **[FACT] 已交付** | 依据课程 PDF 第 4 页「报告含系统架构图」：Mermaid 可编辑源 `docs/系统架构图.md`（5 张图：总体分层 / 双模型协同与冻结边界 / 一图多目标数据流 / 推理演示流 / 评测链）+ 200 dpi 报告位图 `results/figures/system_architecture.png`；重绘 `scripts/draw_system_architecture.py` |
+| **恢复质量性能分析（2026-11-17）** | **[RESULT] 已实测，结果为负，如实保留** | `scripts/eval_restoration_quality.py` 对真实 4B 出图算 PSNR / SSIM / LPIPS(AlexNet)：均值 **10.68 dB / 0.3737 / 0.7059**，而退化输入本身是 **15.14 dB / 0.5588**（ΔPSNR **−4.46 dB**）；own-GT 最近仅 **2/4** → `NO-TEXT-TARGET-ALIGNMENT`；编辑组两两 LPIPS 均值 **0.5031** → `TEXT-CHANGES-OUTPUT`。**零训练生成式重建没有提升相对 GT 的保真度**，不得包装成质量提升。图 `results/figures/restoration_quality.png`，JSON `results/reports/restoration_quality.json` |
+| **可交互 Web Demo（2026-11-17）** | **[RESULT] 已端到端跑通** | `app/demo_server.py`：Python 标准库 `http.server` + 原生 HTML/JS，**零新增依赖**；上传老照片 + 文本 → 真实 BF16 FLUX.2 出图；8 条预设（含改蓝天 / 加胡子）、参数滑块、GPU 状态、6 个一键鲁棒性 / 边界用例。`scripts/verify_demo_http.py --generate` 实测：HTTP 层 7 个用例全 PASS，真实生成 384² / 8 步 **21.5 s** 返回有效 PNG。见 `docs/Demo使用说明.md` |
 
 > **[RESULT] 「文本起作用了」要分三层，别混为一谈**（2026-11-12 实测）
 > 1. **能改变输出** ✓：训练后 `d_text=0.0468`，且随步数增长（20 步 0.0199 → 100 步 0.0468）。
@@ -61,6 +63,8 @@
 > **不要拿 toy 的 PSNR 当恢复质量指标。** toy 主干随机初始化且全程冻结，本身不具备恢复能力；PSNR ≈ 7 dB 只用于 A/B/C/D 组内相对比较。真实基座才携带扩散先验。
 >
 > **环境按用户决定在 `ChatAI` 内原地升级，没有新建 conda 环境。** 升级记录见 `docs/环境升级.md`，回滚快照 `docs/升级前包快照_20261107.txt`。
+>
+> **[FIX] 不装 gradio（2026-11-17）**：装 `gradio==4.44.1` 会把 `pydantic 1.10.13→2.14.3`、`rich 13.7.1→15.0.0`、`typer 0.9.0→0.29.1`，`pip check` 立刻报 `fschat / spacy / streamlit / weasel` 四个冲突。已卸载 gradio、恢复三个原版本，`pip check` 回到 `No broken requirements found`，`torch / diffusers / transformers / accelerate` 版本不动。Demo 改为零新增依赖的 `app/demo_server.py`，旧入口 `app/gradio_demo.py` 保留为转发 shim。详见 `docs/Demo使用说明.md` §1。
 
 ---
 
@@ -234,15 +238,53 @@ scripts/build_multi_target_data.py   从真实 GT 构建一图多目标 manifest
 scripts/show_multi_target_example.py 一图多目标对照图（共享 x + 4 个 y + 各自文本）
 scripts/diagnose_ambiguity.py    Var_k(y_k) 下界 + own/wrong/off loss + 样式选择性
 scripts/show_ambiguity_ab.py     两轮 A/B 汇总图与 ambiguity_summary.json
-scripts/                         数据、探测、自检、消融、诊断
-app/gradio_demo.py               交互演示 [需 gradio]
+scripts/draw_system_architecture.py  重绘报告用系统架构图（PNG 200 dpi）
+scripts/eval_restoration_quality.py  PSNR / SSIM / LPIPS + 目标选择性 + 文本响应
+scripts/verify_demo_http.py      Demo 的 HTTP 层可复现验证（--generate 跑真实出图）
+scripts/run_flux2_old_photo_demo.py  真实 4B 出图（修复风格 / 内容编辑两组）
+scripts/                         数据、探测、自检、消融、诊断、评测
+app/demo_server.py               零新增依赖的交互 Web Demo（stdlib HTTP）
+app/gradio_demo.py               已废弃的兼容转发 shim（不再需要 gradio）
 outputs/                         checkpoint / 日志 / 样例图
 docs/方案设计.md                  方案论证、修正、显存预算、失败判据、§11 结构契约、§12 三维对齐
 docs/环境升级.md                  ChatAI 原地升级记录与回滚
 docs/实验记录模板.md               每次实验的复现记录模板
 docs/真实数据集与论文对标.md        论文数据构造/规模/指标对标 + 本项目真实数据方案
 docs/一图多目标数据集调研.md        一输入多目标范式对标 + 歧义 gap 推导 + 两轮 A/B 结果
+docs/仓库结构与复现.md             入库/不入库规则、逐条复现命令、成果索引
+docs/课程目标与达成情况.md          官方课程要求逐条对照与 10 天优先级
+docs/系统架构图.md                 报告用架构图（Mermaid 源 + 位图）
+docs/Demo使用说明.md               交互 Demo 启动、接口、边界用例与负面声明
+results/figures/                   11 张精选图（含 system_architecture / restoration_quality）
+results/reports/                   10 份关键 JSON 报告
 ```
+
+---
+
+## 面向课程要求的三项交付（2026-11-17 新增）
+
+依据 `AI系统实训_课程安排.pdf` 第 4 页：系统架构图、性能分析、基本可用 Demo（含鲁棒性 / 边界情况）。逐条达成对照见 `docs/课程目标与达成情况.md`。
+
+```bash
+set P=D:/Anaconda/envs/ChatAI/python.exe
+set R=G:/研究生生涯相关/课程/人工智能系统实训
+
+# 1) 系统架构图（无需权重 / GPU）
+%P% %R%/scripts/draw_system_architecture.py        # -> results/figures/system_architecture.png
+
+# 2) 恢复质量性能分析（读已落盘的真实出图，不重新推理）
+%P% %R%/scripts/eval_restoration_quality.py        # -> results/reports/restoration_quality.json
+
+# 3) 交互 Demo（终端 1：启动服务；终端 2：验证）
+%P% %R%/app/demo_server.py --port 7860             # 打开 http://127.0.0.1:7860/
+%P% %R%/app/demo_server.py --selftest              # 不加载模型，5 个边界用例
+%P% %R%/scripts/verify_demo_http.py                # HTTP 层 7 个用例
+%P% %R%/scripts/verify_demo_http.py --generate     # 端到端真实出图
+```
+
+> **诚实边界**：性能分析给出的是**负面结果**（零训练生成式重建相对数据集 GT 的
+> PSNR/LPIPS 劣于退化输入本身）；Demo 展示的是**原生 FLUX.2 零训练能力**，
+> 不是自训文本旁路。一图多目标 verdict 仍为 `NOT-YET-SUPPORTED`。
 
 ---
 
@@ -319,12 +361,12 @@ set R=G:/研究生生涯相关/课程/人工智能系统实训
 
 ## 仓库结构（2026-11-13 建立私人仓库）
 
-| ✅ 入库（约 6 MB） | ❌ 不入库（本机保留，可重建） |
+| ✅ 入库（约 7 MB） | ❌ 不入库（本机保留，可重建） |
 |---|---|
-| `src/` `scripts/` `configs/` `docs/` `app/` | `models/` 17 GB（FLUX.2 BF16 权重） |
-| `README.md` `requirements.txt` `.gitignore` | `data/` 2.7 GB（数据集 / 分片 / 文本缓存） |
-| `results/figures/` 8 张精选对比图 | `outputs/` 1.6 GB（checkpoint / 全量日志 / 5226 张原图） |
-| `results/reports/` 8 份关键 JSON 报告 | `*.pt` `*.safetensors` `*.parquet` `__pycache__` `*.log` |
+| `src/` `scripts/` `configs/` `docs/` `app/` | `models/` 17 GB（FLUX.2 BF16 权重 + LPIPS 骨干缓存 234 MB） |
+| `README.md` `requirements.txt` `.gitignore` `AI系统实训_课程安排.pdf` | `data/` 2.7 GB（数据集 / 分片 / 文本缓存） |
+| `results/figures/` 11 张精选对比图 | `outputs/` 1.6 GB（checkpoint / 全量日志 / 5226 张原图） |
+| `results/reports/` 10 份关键 JSON 报告 | `*.pt` `*.safetensors` `*.parquet` `__pycache__` `*.log` |
 
 完整目录语义、逐条复现命令、成果索引与诚实边界见 **[`docs/仓库结构与复现.md`](docs/仓库结构与复现.md)**。
 

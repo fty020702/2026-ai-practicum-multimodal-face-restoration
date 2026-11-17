@@ -1,0 +1,221 @@
+{
+  "status": "DONE",
+  "scope": "REAL FLUX.2 [klein] 4B Base outputs, zero training, native Qwen3 text + native image=[ref]",
+  "metrics": "PSNR(dB) / SSIM / LPIPS(AlexNet) on 512x512 RGB",
+  "input_image": "data\\old_photo_multitarget\\old\\00000.jpg",
+  "restore_run_seconds": 99.0,
+  "edit_run_seconds": 90.5,
+  "num_inference_steps": 20,
+  "cases": [
+    {
+      "target_id": "natural_color",
+      "prompt": "restore in full natural color: remove scratches dust and grain, recover the original colors. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; preserve the expression of the portrait",
+      "output": "outputs\\samples\\flux2_old_photo\\natural_color.png",
+      "gt": "data/old_photo_multitarget/clean/00000_natural_color.jpg",
+      "seconds": 32.7,
+      "output_vs_own_gt": {
+        "psnr_db": 11.129,
+        "ssim": 0.40594,
+        "lpips": 0.66523
+      },
+      "degraded_input_vs_own_gt": {
+        "psnr_db": 14.5212,
+        "ssim": 0.46308,
+        "lpips": 0.57714
+      },
+      "delta_psnr_db": -3.3922,
+      "delta_ssim": -0.05714,
+      "delta_lpips": 0.08809,
+      "lpips_to_wrong_gts": {
+        "monochrome": 0.6707,
+        "sepia_tone": 0.62239,
+        "minimal_repair": 1.12405
+      },
+      "mean_lpips_to_wrong_gts": 0.80571,
+      "own_gt_is_nearest": false
+    },
+    {
+      "target_id": "monochrome",
+      "prompt": "black and white only: repair the print and keep the grayscale tone. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; avoid hallucinating details",
+      "output": "outputs\\samples\\flux2_old_photo\\monochrome.png",
+      "gt": "data/old_photo_multitarget/clean/00000_monochrome.jpg",
+      "seconds": 23.3,
+      "output_vs_own_gt": {
+        "psnr_db": 12.3771,
+        "ssim": 0.4823,
+        "lpips": 0.46581
+      },
+      "degraded_input_vs_own_gt": {
+        "psnr_db": 12.1756,
+        "ssim": 0.38575,
+        "lpips": 0.64556
+      },
+      "delta_psnr_db": 0.2015,
+      "delta_ssim": 0.09655,
+      "delta_lpips": -0.17975,
+      "lpips_to_wrong_gts": {
+        "natural_color": 0.49562,
+        "sepia_tone": 0.60639,
+        "minimal_repair": 1.10718
+      },
+      "mean_lpips_to_wrong_gts": 0.7364,
+      "own_gt_is_nearest": true
+    },
+    {
+      "target_id": "sepia_tone",
+      "prompt": "restore with sepia tone: clean all defects but keep the vintage brown color. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; keep skin tones natural",
+      "output": "outputs\\samples\\flux2_old_photo\\sepia_tone.png",
+      "gt": "data/old_photo_multitarget/clean/00000_sepia_tone.jpg",
+      "seconds": 21.2,
+      "output_vs_own_gt": {
+        "psnr_db": 10.8244,
+        "ssim": 0.48271,
+        "lpips": 0.58239
+      },
+      "degraded_input_vs_own_gt": {
+        "psnr_db": 15.3074,
+        "ssim": 0.47286,
+        "lpips": 0.5391
+      },
+      "delta_psnr_db": -4.483,
+      "delta_ssim": 0.00985,
+      "delta_lpips": 0.04329,
+      "lpips_to_wrong_gts": {
+        "natural_color": 0.68393,
+        "monochrome": 0.67755,
+        "minimal_repair": 1.17662
+      },
+      "mean_lpips_to_wrong_gts": 0.84603,
+      "own_gt_is_nearest": true
+    },
+    {
+      "target_id": "minimal_repair",
+      "prompt": "remove only the physical damage: leave the original grain and faded tone intact. Baronne James de Rothschild-nee Betty von Rothschild | Jean-Auguste-Dominique Ingres | oil painting; preserve facial identity",
+      "output": "outputs\\samples\\flux2_old_photo\\minimal_repair.png",
+      "gt": "data/old_photo_multitarget/clean/00000_minimal_repair.jpg",
+      "seconds": 20.1,
+      "output_vs_own_gt": {
+        "psnr_db": 8.3994,
+        "ssim": 0.1238,
+        "lpips": 1.11008
+      },
+      "degraded_input_vs_own_gt": {
+        "psnr_db": 18.5611,
+        "ssim": 0.21198,
+        "lpips": 0.4732
+      },
+      "delta_psnr_db": -10.1617,
+      "delta_ssim": -0.08818,
+      "delta_lpips": 0.63688,
+      "lpips_to_wrong_gts": {
+        "natural_color": 0.58339,
+        "monochrome": 0.59968,
+        "sepia_tone": 0.52615
+      },
+      "mean_lpips_to_wrong_gts": 0.56974,
+      "own_gt_is_nearest": false
+    }
+  ],
+  "edit_cases": [
+    {
+      "id": "baseline",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, repair the faded tones. Keep the original background, the person and the face EXACTLY as they are.",
+      "output": "outputs\\samples\\flux2_old_photo_edit\\baseline.png",
+      "vs_shared_input": {
+        "psnr_db": 12.2132,
+        "ssim": 0.39025,
+        "lpips": 0.62878
+      }
+    },
+    {
+      "id": "blue_sky",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, and CHANGE THE BACKGROUND to a clear bright blue sky with a few white clouds. Keep the person, the face and the clothing unchanged.",
+      "output": "outputs\\samples\\flux2_old_photo_edit\\blue_sky.png",
+      "vs_shared_input": {
+        "psnr_db": 9.062,
+        "ssim": 0.3126,
+        "lpips": 0.88253
+      }
+    },
+    {
+      "id": "beard",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, and ADD A THICK DARK BEARD AND MOUSTACHE to the person's face. Keep the original background and clothing unchanged.",
+      "output": "outputs\\samples\\flux2_old_photo_edit\\beard.png",
+      "vs_shared_input": {
+        "psnr_db": 11.7279,
+        "ssim": 0.42109,
+        "lpips": 0.52571
+      }
+    },
+    {
+      "id": "sky_and_beard",
+      "prompt": "Restore this old photograph: remove all scratches, dust spots and film grain, CHANGE THE BACKGROUND to a clear bright blue sky with white clouds, and ADD A THICK DARK BEARD AND MOUSTACHE to the person's face.",
+      "output": "outputs\\samples\\flux2_old_photo_edit\\sky_and_beard.png",
+      "vs_shared_input": {
+        "psnr_db": 8.7207,
+        "ssim": 0.28092,
+        "lpips": 0.88428
+      }
+    }
+  ],
+  "notes": [
+    "[FACT] 这些是原生 FLUX.2 生成式重建结果，零训练；不是本项目自训文本旁路的输出，不能用它证明一图多目标 verdict。",
+    "[FACT] 生成式重建不追求逐像素对齐，PSNR / SSIM 偏低是预期现象，如实报告；评估感知质量时以 LPIPS 为主。",
+    "[RESULT][负面] 本次实测输出相对 GT 的 PSNR / LPIPS 甚至劣于未修复的退化输入本身（见 psnr_improvement_db / lpips_improvement 为负），说明『零训练原生 FLUX.2』无法复现本数据集的特定修复目标；这正是需要训练文本旁路的原因，不得包装成质量提升。",
+    "[FACT] LPIPS 使用 lpips(AlexNet) 官方实现；AlexNet 骨干权重由 TORCH_HOME 固定缓存在 models/torch_hub/ 内，不依赖外网可复现。",
+    "[FACT] 编辑组无 GT，只能用『同一输入 + 不同文本 → 输出两两差异』作为文本响应代理指标，不能当作指令跟随准确率。"
+  ],
+  "target_selectivity": {
+    "own_gt_nearest_count": 2,
+    "total": 4,
+    "rate": 0.5,
+    "verdict": "NO-TEXT-TARGET-ALIGNMENT"
+  },
+  "edit_pairwise": {
+    "baseline__blue_sky": {
+      "psnr_db": 9.2228,
+      "ssim": 0.52145,
+      "lpips": 0.58465
+    },
+    "baseline__beard": {
+      "psnr_db": 18.8487,
+      "ssim": 0.77415,
+      "lpips": 0.23396
+    },
+    "baseline__sky_and_beard": {
+      "psnr_db": 8.3487,
+      "ssim": 0.44385,
+      "lpips": 0.60332
+    },
+    "blue_sky__beard": {
+      "psnr_db": 9.059,
+      "ssim": 0.42827,
+      "lpips": 0.7067
+    },
+    "blue_sky__sky_and_beard": {
+      "psnr_db": 15.9757,
+      "ssim": 0.75615,
+      "lpips": 0.18309
+    },
+    "beard__sky_and_beard": {
+      "psnr_db": 8.6096,
+      "ssim": 0.39405,
+      "lpips": 0.70684
+    }
+  },
+  "text_response": {
+    "mean_pairwise_lpips": 0.50309,
+    "min_pairwise_lpips": 0.18309,
+    "max_pairwise_lpips": 0.70684,
+    "verdict": "TEXT-CHANGES-OUTPUT"
+  },
+  "summary": {
+    "mean_psnr_db": 10.6825,
+    "mean_ssim": 0.37369,
+    "mean_lpips": 0.70588,
+    "degraded_input_mean_psnr_db": 15.1413,
+    "degraded_input_mean_lpips": 0.55875,
+    "psnr_improvement_db": -4.4588,
+    "lpips_improvement": -0.14713
+  }
+}

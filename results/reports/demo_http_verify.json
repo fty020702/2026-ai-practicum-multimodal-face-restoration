@@ -1,0 +1,194 @@
+{
+  "base": "http://127.0.0.1:7860",
+  "checks": [
+    {
+      "name": "GET /",
+      "http": 200,
+      "pass": true
+    },
+    {
+      "name": "GET /api/status",
+      "http": 200,
+      "pass": true
+    },
+    {
+      "name": "GET /api/examples",
+      "http": 200,
+      "pass": true
+    },
+    {
+      "name": "POST /api/validate (7 cases)",
+      "pass": true
+    },
+    {
+      "name": "POST /api/generate (real FLUX.2)",
+      "pass": true
+    }
+  ],
+  "boundary": [
+    {
+      "case": "合法输入",
+      "http": 200,
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "normalized": {
+        "prompt_chars": 22,
+        "steps": 20,
+        "size": 512,
+        "guidance": 4.0,
+        "seed": 20261113,
+        "image_mode": "RGB",
+        "image_size": [
+          512,
+          512
+        ]
+      }
+    },
+    {
+      "case": "空图",
+      "http": 400,
+      "ok": false,
+      "errors": [
+        "未提供图像：请先上传或选择一张老照片"
+      ],
+      "warnings": [],
+      "normalized": {
+        "prompt_chars": 7,
+        "steps": 20,
+        "size": 512,
+        "guidance": 4.0,
+        "seed": 20261113,
+        "image_mode": null,
+        "image_size": null
+      }
+    },
+    {
+      "case": "空文本回退",
+      "http": 200,
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "文本为空，已回退到中性修复指令"
+      ],
+      "normalized": {
+        "prompt_chars": 176,
+        "steps": 20,
+        "size": 512,
+        "guidance": 4.0,
+        "seed": 20261113,
+        "image_mode": "RGB",
+        "image_size": [
+          512,
+          512
+        ]
+      }
+    },
+    {
+      "case": "超长文本截断",
+      "http": 200,
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "文本长度 2099 超过 1000，已截断"
+      ],
+      "normalized": {
+        "prompt_chars": 1000,
+        "steps": 20,
+        "size": 512,
+        "guidance": 4.0,
+        "seed": 20261113,
+        "image_mode": "RGB",
+        "image_size": [
+          512,
+          512
+        ]
+      }
+    },
+    {
+      "case": "损坏图像",
+      "http": 400,
+      "ok": false,
+      "errors": [
+        "无法解析图像（UnidentifiedImageError）：请上传有效 PNG/JPEG"
+      ],
+      "warnings": [],
+      "normalized": {
+        "prompt_chars": 7,
+        "steps": 20,
+        "size": 512,
+        "guidance": 4.0,
+        "seed": 20261113,
+        "image_mode": null,
+        "image_size": null
+      }
+    },
+    {
+      "case": "越界参数裁剪",
+      "http": 200,
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "参数 999 超界，已裁剪到 [1,50]",
+        "参数 4096 超界，已裁剪到 [256,1024]",
+        "参数 99 超界，已裁剪到 [1.0,8.0]",
+        "参数 -1 超界，已裁剪到 [0,2147483647]"
+      ],
+      "normalized": {
+        "prompt_chars": 7,
+        "steps": 50,
+        "size": 1024,
+        "guidance": 8.0,
+        "seed": 0,
+        "image_mode": "RGB",
+        "image_size": [
+          512,
+          512
+        ]
+      }
+    },
+    {
+      "case": "灰度输入",
+      "http": 200,
+      "ok": true,
+      "errors": [],
+      "warnings": [
+        "输入为 L 模式，已自动转换为 RGB"
+      ],
+      "normalized": {
+        "prompt_chars": 7,
+        "steps": 20,
+        "size": 512,
+        "guidance": 4.0,
+        "seed": 20261113,
+        "image_mode": "RGB",
+        "image_size": [
+          96,
+          96
+        ]
+      }
+    }
+  ],
+  "status": "PASS",
+  "status_info": {
+    "weights_present": true,
+    "pipeline_state": "NOT_LOADED",
+    "cuda_available": true,
+    "gpu_free_mib": 11056,
+    "presets": 8
+  },
+  "generation": {
+    "http": 200,
+    "ok": true,
+    "seconds": 21.5,
+    "warnings": [],
+    "used_guidance": 4.0,
+    "error": null,
+    "saved": "outputs\\samples\\demo_http_generated.png",
+    "size": [
+      384,
+      384
+    ]
+  },
+  "all_pass": true
+}
