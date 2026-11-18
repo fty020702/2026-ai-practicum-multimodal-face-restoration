@@ -2,7 +2,7 @@
 
 > **工程内核**：冻结扩散主干 + 可训练文本分支 / 多模态参考图条件；当前以老照片人像修复与文本条件编辑为落点。
 > **开源仓库（2026-11-18 起公开）**：[fty020702/2026-ai-practicum-multimodal-face-restoration](https://github.com/fty020702/2026-ai-practicum-multimodal-face-restoration)。只提交代码、配置、文档与精选成果快照；17 GB 权重 / 2.7 GB 数据 / 1.6 GB 实验产物留在本机。
-> **许可**：[`LICENSE`](LICENSE) —— **CC BY-NC-SA 4.0**（署名-非商业性使用-相同方式共享 4.0 国际）。**仅限学术交流 / 学习 / 引用 / 修改，禁止商业使用**；衍生作品须同协议共享并署名。
+> **许可**：[`LICENSE`](LICENSE) —— **CC BY-NC-SA 4.0**（署名-非商业性使用-相同方式共享 4.0 国际）。**仅限学术交流 / 学习 / 引用 / 修改，禁止商业使用**；衍生作品须同协议共享并署名。GitHub 侧栏可能显示 "Other"，因为 CC BY-NC-SA 不是 OSI 认证协议，自动识别库不覆盖；以 `LICENSE` 文件内的 SPDX 标识 `CC-BY-NC-SA-4.0` 为准。
 > 目录语义、复现路径与成果索引见 [`docs/仓库结构与复现.md`](docs/仓库结构与复现.md)，精选对比图见 `results/figures/`。
 > 课程官方要求与本项目达成情况对照见 [`docs/课程目标与达成情况.md`](docs/课程目标与达成情况.md)（依据 `AI系统实训_课程安排.pdf`）。
 >
