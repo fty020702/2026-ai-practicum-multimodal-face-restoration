@@ -1,9 +1,12 @@
 # 2026 人工智能实训 —— 多模态参考人脸图像恢复
 
 > **工程内核**：冻结扩散主干 + 可训练文本分支 / 多模态参考图条件；当前以老照片人像修复与文本条件编辑为落点。
-> **私人仓库**：[fty020702/2026-ai-practicum-multimodal-face-restoration](https://github.com/fty020702/2026-ai-practicum-multimodal-face-restoration)（`private`）。只提交代码、配置、文档与精选成果快照；17 GB 权重 / 2.7 GB 数据 / 1.6 GB 实验产物留在本机。
+> **开源仓库（2026-11-18 起公开）**：[fty020702/2026-ai-practicum-multimodal-face-restoration](https://github.com/fty020702/2026-ai-practicum-multimodal-face-restoration)。只提交代码、配置、文档与精选成果快照；17 GB 权重 / 2.7 GB 数据 / 1.6 GB 实验产物留在本机。
+> **许可**：[`LICENSE`](LICENSE) —— **CC BY-NC-SA 4.0**（署名-非商业性使用-相同方式共享 4.0 国际）。**仅限学术交流 / 学习 / 引用 / 修改，禁止商业使用**；衍生作品须同协议共享并署名。
 > 目录语义、复现路径与成果索引见 [`docs/仓库结构与复现.md`](docs/仓库结构与复现.md)，精选对比图见 `results/figures/`。
 > 课程官方要求与本项目达成情况对照见 [`docs/课程目标与达成情况.md`](docs/课程目标与达成情况.md)（依据 `AI系统实训_课程安排.pdf`）。
+>
+> **引用 / 分享**：请注明项目名「2026 人工智能实训 —— 多模态参考人脸图像恢复」、作者 `fty020702` 与本仓库链接；转发或改编时保留本许可证与负面结论的边界声明（见下）。
 
 把 [DeepSeek 分享对话](https://chat.deepseek.com/share/mkk5xoznfgkuuga1vq) 的最终方案落地成一个**可运行、可验证、可迁移到真实 4B 基座**的工程。
 
