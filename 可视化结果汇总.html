@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>历史可视化结果汇总 · 多模态参考人脸图像恢复</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--bd:#dfe6ef;--ink:#1e2a3a;--mut:#5b6b7c;--blue:#3c6fd6;--orange:#de8a20;--green:#2e8b57;--purple:#7a4cbf}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","Segoe UI",sans-serif;font-size:14px;line-height:1.6}
+header{background:linear-gradient(135deg,#eef4ff,#f7f9fc);border-bottom:1px solid var(--bd);padding:22px 28px}
+h1{margin:0;font-size:21px}
+.sub{color:var(--mut);font-size:13px;margin-top:7px;max-width:960px}
+.tag{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11.5px;margin-right:6px;background:#e9f0fd;color:var(--blue)}
+main{max-width:1320px;margin:auto;padding:20px 28px 60px}
+section{margin-top:30px}
+h2{font-size:16px;margin:0 0 4px;padding-left:10px;border-left:4px solid var(--blue)}
+.desc{color:var(--mut);font-size:12.5px;margin:5px 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:11px;overflow:hidden;cursor:zoom-in;box-shadow:0 1px 4px rgba(30,42,58,.06);transition:.15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(30,42,58,.13);border-color:#b8c9e2}
+.card img{width:100%;height:210px;object-fit:contain;background:#fafbfc;display:block;border-bottom:1px solid var(--bd)}
+.meta{padding:10px 12px}
+.name{font-weight:700;font-size:13px;word-break:break-all}
+.note{color:var(--mut);font-size:11.5px;margin-top:3px;min-height:32px}
+.lb{font-size:10.5px;color:#8a99ab;margin-top:4px}
+#modal{display:none;position:fixed;inset:0;background:rgba(12,18,28,.88);z-index:50;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+#modal img{max-width:96vw;max-height:88vh;object-fit:contain;background:#fff;border-radius:6px}
+#mcap{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#e8eef7;font-size:13px}
+nav{position:sticky;top:0;background:rgba(245,247,250,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--bd);padding:9px 28px;z-index:10;font-size:12.5px}
+nav a{color:var(--blue);text-decoration:none;margin-right:14px;white-space:nowrap}
+footer{color:var(--mut);font-size:12px;padding:24px 28px;border-top:1px solid var(--bd);text-align:center}
+</style></head>
+<body>
+<header>
+<h1>历史可视化结果汇总</h1>
+<div class="sub">2026 人工智能实训 —— 多模态参考人脸图像恢复 · 全部产物位于本机项目目录 <code>G:\研究生生涯相关\课程\人工智能系统实训</code>。
+精选副本已入公开仓库 <code>results/figures/</code>。点击任意图片放大查看。</div>
+<div style="margin-top:9px">
+<span class="tag">11 张精选图</span><span class="tag">24 张全量产物</span><span class="tag">2026-11-07 → 11-18</span><span class="tag">CC BY-NC-SA 4.0</span>
+</div>
+</header>
+<nav>
+<a href="#s1">数据样本</a><a href="#s2">消融与文本必要性</a><a href="#s3">真实 FLUX.2 出图</a><a href="#s3b">多参考图验证</a><a href="#s4">架构与性能</a><a href="#s5">真实照片与训练数据</a>
+</nav>
+<main>
+
+<section id="s1"><h2>① 数据样本：一图多目标 / 官方分片</h2>
+<div class="desc">同一张退化图对应 K 个不同高清目标，文本是唯一消歧信息；以及官方 IP2P 500MB 分片的样本。</div>
+<div class="grid" id="g1"></div></section>
+
+<section id="s2"><h2>② 消融与文本必要性：严格 A/B</h2>
+<div class="desc">唯一变量 <code>collapse_targets</code>。注意老照片 A 类 verdict 为 <b>NOT-YET-SUPPORTED</b>（7.28% &lt; 10%），不可与 IP2P A 类的 36.73% 混用。</div>
+<div class="grid" id="g2"></div></section>
+
+<section id="s3"><h2>③ 真实 FLUX.2 [klein] 4B 出图（零训练）</h2>
+<div class="desc">冻结原生 Qwen3 文本 + 官方 <code>image=[ref]</code>。同一老照片 + 不同文本 → 修复风格 / 背景改蓝天 / 人脸加胡子。这不是项目自训文本旁路的成果。</div>
+<div class="grid" id="g3"></div></section>
+
+<section id="s3b"><h2>③-b 原生多参考图输入验证（2026-11-20 新增）</h2>
+<div class="desc">同一 prompt + seed，只改参考图列表。<b>double_01 → double_02 只换第 2 张参考图，输出 RMS 0.413</b>（换唯一参考图是 0.480），证明第 2 张图被真实读取而非丢弃。fuse_01 用融合指令，取 ref[0] 人脸 + ref[1] 雪林背景。</div>
+<div class="grid" id="g3b"></div></section>
+
+<section id="s4"><h2>④ 系统架构图与性能分析</h2>
+<div class="desc">课程报告用架构图（Mermaid 源见 docs/系统架构图.md）；性能分析结论为负面：零训练生成式重建相对 GT 的 PSNR/LPIPS 劣于退化输入本身。</div>
+<div class="grid" id="g4"></div></section>
+
+<section id="s5"><h2>⑤ 真实照片评测集与训练数据核对</h2>
+<div class="desc">无 GT 的真实老照片评测可视化，以及「本次训练到底喂了什么数据」的核对图。</div>
+<div class="grid" id="g5"></div></section>
+
+</main>
+<footer>点击图片放大 · 按 Esc 或点击空白处关闭 · 事实分级见各文档 [FACT]/[RESULT]/[INFERENCE]</footer>
+<div id="modal"><img id="mimg" src=""><div id="mcap"></div></div>
+
+<script>
+const FIG='results/figures/', SMP='outputs/samples/';
+const DATA={
+ g1:[
+  [FIG+'data_example.png','data_example.png','synthetic 数据示例：64×64 清洁图 / 6 种退化 / 文本'],
+  [FIG+'multi_target_example.png','multi_target_example.png','DIV2K 一图多目标：共享退化 x + 4 个不同 GT'],
+  [FIG+'old_photo_multitarget_example.png','old_photo_multitarget_example.png','老照片一图多目标：800 组 × 4，目标间 RMS 52.28'],
+  [SMP+'ip2p_500m_example.png','ip2p_500m_example.png','官方 IP2P 500MB 分片 triplet 样本（512² JPEG）']
+ ],
+ g2:[
+  [SMP+'ablation.png','ablation.png','toy 四组消融 A/B/C/D 对比'],
+  [FIG+'ambiguity_ab.png','ambiguity_ab.png','DIV2K A 类 R1/R2 严格 A/B：60.61% vs 8.95%'],
+  [FIG+'ip2p_500m_summary.png','ip2p_500m_summary.png','官方分片证伪（0.017%）+ A 类视图 36.73%'],
+  [FIG+'old_photo_multitarget_summary.png','old_photo_multitarget_summary.png','老照片 A/B 汇总：control 0.03% vs A 类 7.28%，未过阈值']
+ ],
+ g3:[
+  [FIG+'flux2_restoration_grid.png','flux2_restoration_grid.png','一张老化肖像 + 4 条修复风格文本 → 4 张不同修复'],
+  [FIG+'flux2_edit_grid.png','flux2_edit_grid.png','改蓝天 / 加胡子 / 两者组合，文本是唯一变量'],
+  [FIG+'demo_http_generated.png','demo_http_generated.png','通过 Web Demo HTTP 接口真实生成（384² / 8 步 / 21.5s）'],
+  [SMP+'flux2_old_photo_edit/grid.png','flux2_old_photo_edit/grid.png','内容编辑组完整对照：上排输出 / 下排指令文本']
+ ],
+ g3b:[
+  [FIG+'flux2_multi_ref_grid.png','flux2_multi_ref_grid.png','三张参考图 + 五个对照输出：单图 / 双图 / 换第二张 / 融合指令'],
+  [FIG+'flux2_multi_ref_double_01.png','flux2_multi_ref_double_01.png','double_01：image=[ref0, ref1]，ref1 为雪林篝火'],
+  [FIG+'flux2_multi_ref_double_02.png','flux2_multi_ref_double_02.png','double_02：image=[ref0, ref2]，只换第 2 张 → 风车田野'],
+  [FIG+'flux2_multi_ref_fuse_01.png','flux2_multi_ref_fuse_01.png','fuse_01：取 ref0 人脸 + ref1 衣着背景，语义融合成功']
+ ],
+ g4:[
+  [FIG+'system_architecture.png','system_architecture.png','报告用系统架构图：五层 + 双模型协同 + 冻结边界'],
+  [FIG+'restoration_quality.png','restoration_quality.png','PSNR/SSIM/LPIPS + 目标选择性 + 文本响应（负面结果）']
+ ],
+ g5:[
+  [SMP+'train_data_used.png','train_data_used.png','本次 GPU 训练实际喂入的数据核对（64×64 synthetic）'],
+  [SMP+'old_photo_example.png','old_photo_example.png','真实老照片评测集（无 GT）与论文式退化样本'],
+  [SMP+'old_photo_real_eval.png','old_photo_real_eval.png','真实老照片上的定性评测可视化']
+ ]
+};
+for(const [id,arr] of Object.entries(DATA)){
+  document.getElementById(id).innerHTML=arr.map(([src,name,note])=>
+    '<div class="card" data-src="'+src+'" data-cap="'+name+' — '+note+'">'+
+    '<img loading="lazy" src="'+src+'" alt="'+name+'">'+
+    '<div class="meta"><div class="name">'+name+'</div><div class="note">'+note+'</div>'+
+    '<div class="lb">'+src+'</div></div></div>').join('');
+}
+document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{
+  document.getElementById('mimg').src=c.dataset.src;
+  document.getElementById('mcap').textContent=c.dataset.cap;
+  document.getElementById('modal').style.display='flex';
+});
+const modal=document.getElementById('modal');
+modal.onclick=()=>{modal.style.display='none';document.getElementById('mimg').src='';};
+document.onkeydown=e=>{if(e.key==='Escape')modal.click();};
+</script>
+</body></html>

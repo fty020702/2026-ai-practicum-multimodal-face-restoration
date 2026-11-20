@@ -37,7 +37,7 @@
 | **系统架构图（2026-11-17）** | **[FACT] 已交付** | 依据课程 PDF 第 4 页「报告含系统架构图」：Mermaid 可编辑源 `docs/系统架构图.md`（5 张图：总体分层 / 双模型协同与冻结边界 / 一图多目标数据流 / 推理演示流 / 评测链）+ 200 dpi 报告位图 `results/figures/system_architecture.png`；重绘 `scripts/draw_system_architecture.py` |
 | **恢复质量性能分析（2026-11-17）** | **[RESULT] 已实测，结果为负，如实保留** | `scripts/eval_restoration_quality.py` 对真实 4B 出图算 PSNR / SSIM / LPIPS(AlexNet)：均值 **10.68 dB / 0.3737 / 0.7059**，而退化输入本身是 **15.14 dB / 0.5588**（ΔPSNR **−4.46 dB**）；own-GT 最近仅 **2/4** → `NO-TEXT-TARGET-ALIGNMENT`；编辑组两两 LPIPS 均值 **0.5031** → `TEXT-CHANGES-OUTPUT`。**零训练生成式重建没有提升相对 GT 的保真度**，不得包装成质量提升。图 `results/figures/restoration_quality.png`，JSON `results/reports/restoration_quality.json` |
 | **可交互 Web Demo（2026-11-17）** | **[RESULT] 已端到端跑通** | `app/demo_server.py`：Python 标准库 `http.server` + 原生 HTML/JS，**零新增依赖**；上传老照片 + 文本 → 真实 BF16 FLUX.2 出图；8 条预设（含改蓝天 / 加胡子）、参数滑块、GPU 状态、6 个一键鲁棒性 / 边界用例。`scripts/verify_demo_http.py --generate` 实测：HTTP 层 7 个用例全 PASS，真实生成 384² / 8 步 **21.5 s** 返回有效 PNG。见 `docs/Demo使用说明.md` |
-
+| **原生多参考图输入验证（2026-11-20）** | **[RESULT] 第二张图被真实读取** | 源码 `pipeline_flux2_klein.py:611/756-777/351-363/533-534` 给每张参考图分配递增 T 坐标。5 组对照（同 prompt/seed/steps，512²/20 步）：换唯一图 RMS **0.480**；加第 2 张 **0.133**；**只换第 2 张 double_01→double_02 = 0.413**（同一量级，证明未丢弃）；融合指令 fuse_01 取 ref0 人脸 + ref1 衣着背景，RMS **0.311**。图 `results/figures/flux2_multi_ref_grid.png`，报告 `results/reports/flux2_multi_ref_progress.json`，脚本 `scripts/run_flux2_multi_ref_demo.py`。**边界**：原生冻结模型零训练能力，非自训旁路 |
 > **[RESULT] 「文本起作用了」要分三层，别混为一谈**（2026-11-12 实测）
 > 1. **能改变输出** ✓：训练后 `d_text=0.0468`，且随步数增长（20 步 0.0199 → 100 步 0.0468）。
 > 2. **被训练目标需要** ✗：换上错误文本几乎不涨 loss（1.08%，正好 1 个 bf16 ULP）；「有文本」有用，「文本对不对」几乎无所谓。
@@ -244,6 +244,8 @@ scripts/show_ambiguity_ab.py     两轮 A/B 汇总图与 ambiguity_summary.json
 scripts/draw_system_architecture.py  重绘报告用系统架构图（PNG 200 dpi）
 scripts/eval_restoration_quality.py  PSNR / SSIM / LPIPS + 目标选择性 + 文本响应
 scripts/verify_demo_http.py      Demo 的 HTTP 层可复现验证（--generate 跑真实出图）
+scripts/run_flux2_multi_ref_demo.py  原生多参考图验证（单图/双图/换图/融合 5 组对照）
+scripts/watch_flux2_multi_ref.py     多参考图验证实时面板（--once / --interval N）
 scripts/run_flux2_old_photo_demo.py  真实 4B 出图（修复风格 / 内容编辑两组）
 scripts/                         数据、探测、自检、消融、诊断、评测
 app/demo_server.py               零新增依赖的交互 Web Demo（stdlib HTTP）

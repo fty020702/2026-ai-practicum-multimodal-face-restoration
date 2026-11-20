@@ -1,0 +1,74 @@
+{
+  "status": "DONE",
+  "model": "black-forest-labs/FLUX.2-klein-base-4B (local BF16)",
+  "question": "is the 2nd reference image actually read by the model?",
+  "size": 512,
+  "steps": 20,
+  "guidance": 4.0,
+  "seed": 20261120,
+  "refs": [
+    "data\\old_photo_multitarget\\old\\00000.jpg",
+    "data\\old_photo_multitarget\\old\\00001.jpg",
+    "data\\old_photo_multitarget\\old\\00002.jpg"
+  ],
+  "cases": [
+    {
+      "id": "single_0",
+      "refs": [
+        0
+      ],
+      "prompt": "Restore these old photographs into clean, natural-color images. Remove scratches, dust and film grain. Keep each person's identity, the background and the clothing EXACTLY as they are.",
+      "output": "outputs\\samples\\flux2_multi_ref\\single_0.png",
+      "seconds": 33.1
+    },
+    {
+      "id": "single_1",
+      "refs": [
+        1
+      ],
+      "prompt": "Restore these old photographs into clean, natural-color images. Remove scratches, dust and film grain. Keep each person's identity, the background and the clothing EXACTLY as they are.",
+      "output": "outputs\\samples\\flux2_multi_ref\\single_1.png",
+      "seconds": 21.2
+    },
+    {
+      "id": "double_01",
+      "refs": [
+        0,
+        1
+      ],
+      "prompt": "Restore these old photographs into clean, natural-color images. Remove scratches, dust and film grain. Keep each person's identity, the background and the clothing EXACTLY as they are.",
+      "output": "outputs\\samples\\flux2_multi_ref\\double_01.png",
+      "seconds": 26.7
+    },
+    {
+      "id": "double_02",
+      "refs": [
+        0,
+        2
+      ],
+      "prompt": "Restore these old photographs into clean, natural-color images. Remove scratches, dust and film grain. Keep each person's identity, the background and the clothing EXACTLY as they are.",
+      "output": "outputs\\samples\\flux2_multi_ref\\double_02.png",
+      "seconds": 27.0
+    },
+    {
+      "id": "fuse_01",
+      "refs": [
+        0,
+        1
+      ],
+      "prompt": "Using the TWO reference photographs: take the FACE AND IDENTITY from the FIRST image and the CLOTHING AND BACKGROUND from the SECOND image, and create ONE clean restored portrait that combines both. Remove all scratches and grain.",
+      "output": "outputs\\samples\\flux2_multi_ref\\fuse_01.png",
+      "seconds": 27.1
+    }
+  ],
+  "errors": [],
+  "load_seconds": 0.6,
+  "pairwise_rms": {
+    "single_0__single_1": 0.48026,
+    "single_0__double_01": 0.13262,
+    "double_01__double_02": 0.41304,
+    "double_01__fuse_01": 0.31075
+  },
+  "grid": "outputs\\samples\\flux2_multi_ref\\grid.png",
+  "total_seconds": 137.5
+}
